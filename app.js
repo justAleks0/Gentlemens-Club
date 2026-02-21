@@ -1266,7 +1266,10 @@ class GentlemensClub {
         } else if (type === 'playlist') {
             user.deletePlaylist(id);
             this.renderPlaylists();
-        } else {
+        } else if (type === 'creator') {
+            user.removeCreatorById(id);
+            this.renderSubscriptions();
+        } else if (type === 'video') {
             this.videos = this.videos.filter(v => v.id !== id);
             this.saveVideos();
             this.render();
@@ -1959,7 +1962,7 @@ class GentlemensClub {
                     <div class="card-actions">
                         <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('creator', '${sub.id}')" title="Edit">✏️</button>
                         <button class="card-action-btn export" onclick="event.preventDefault(); event.stopPropagation(); app.exportItem('creator', '${sub.id}')" title="Export">📤</button>
-                        <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteCreator('${sub.id}', '${this.escapeHtml(sub.name)}', event)" title="Delete">🗑️</button>
+                        <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('creator', '${sub.id}')" title="Delete">🗑️</button>
                     </div>
                     <div class="subscription-avatar">
                         ${sub.avatarUrl 
