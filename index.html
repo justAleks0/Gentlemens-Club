@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gentlemen's Club</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="app.toggleSidebar()">☰</button>
+                </div>
+                
+                <div class="search-container">
+                    <div class="search-box">
+                        <select id="searchSite" class="search-site-select">
+                            <option value="local">Gentlemen's Club</option>
+                            <optgroup label="Video Sites">
+                                <option value="youtube">YouTube</option>
+                                <option value="pornhub">PornHub</option>
+                                <option value="xvideos">XVideos</option>
+                                <option value="xnxx">XNXX</option>
+                                <option value="xhamster">xHamster</option>
+                                <option value="redtube">RedTube</option>
+                                <option value="youporn">YouPorn</option>
+                                <option value="spankbang">SpankBang</option>
+                                <option value="eporner">Eporner</option>
+                            </optgroup>
+                            <optgroup label="Other">
+                                <option value="reddit">Reddit</option>
+                                <option value="redgifs">RedGifs</option>
+                                <option value="rule34video">Rule34Video</option>
+                                <option value="sfmcompile">SFM Compile</option>
+                            </optgroup>
+                        </select>
+                        <input type="text" id="globalSearch" placeholder="Search Gentlemen's Club...">
+                        <button class="search-btn" onclick="app.executeSearch()">🔍</button>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode" onclick="app.toggleTheme()">
+                        <img src="dark mode.gif" alt="Toggle theme" id="themeIcon">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Off-Canvas Side Navigation -->
+        <div id="sideNav" class="sidenav">
+            <button class="sidenav-close" onclick="app.closeSidebar()">&times;</button>
+            <a href="index.html" class="sidenav-logo">
+                <img src="logo.png" alt="Gentlemen's Club">
+            </a>
+            <nav class="sidenav-links">
+                <a href="#" onclick="app.switchTab('videos'); app.closeSidebar();">🏠 Home</a>
+                <a href="#" onclick="app.switchTab('create'); app.closeSidebar();" class="sidenav-create">➕ Create</a>
+                <div class="sidenav-divider"></div>
+                <a href="#" onclick="app.switchTab('favorites'); app.closeSidebar();">❤️ Favorites</a>
+                <a href="#" onclick="app.switchTab('subscriptions'); app.closeSidebar();">⭐ Creators</a>
+                <a href="#" onclick="app.switchTab('playlists'); app.closeSidebar();">📁 Playlists</a>
+                <a href="#" onclick="app.switchTab('watchlater'); app.closeSidebar();">⏱️ Watch Later</a>
+                <a href="#" onclick="app.switchTab('history'); app.closeSidebar();">📜 History</a>
+                <a href="#" onclick="app.switchTab('sites'); app.closeSidebar();">🔗 Sites</a>
+            </nav>
+            <div class="sidenav-footer">
+                <a href="#" onclick="app.openModal('settings'); app.closeSidebar();">⚙️ Settings</a>
+            </div>
+        </div>
+
+        <!-- Overlay for sidenav -->
+        <div id="sideNavOverlay" class="sidenav-overlay" onclick="app.closeSidebar()"></div>
+
+        <!-- Main Content -->
+        <main class="content" id="mainContent">
+            <!-- Home Section (Customizable Dashboard) -->
+            <section id="videos" class="tab-content active">
+                <div class="home-header">
+                    <h1 class="home-greeting" id="homeGreeting">Welcome back</h1>
+                    <button class="customize-btn" onclick="app.toggleEditMode()">
+                        <span id="editModeIcon">✏️</span>
+                        <span id="editModeText">Customize</span>
+                    </button>
+                </div>
+                
+                <div class="widgets-container" id="widgetsContainer">
+                    <!-- Widgets will be rendered here by JS -->
+                </div>
+                
+                <!-- Add Widget Button (visible in edit mode) -->
+                <div class="add-widget-area" id="addWidgetArea">
+                    <button class="add-widget-btn" onclick="app.openWidgetPicker()">
+                        <span>➕</span> Add Widget
+                    </button>
+                </div>
+            </section>
+
+            <!-- Create Section -->
+            <section id="create" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">➕</span>
+                        <h2>Create</h2>
+                    </div>
+                </div>
+                <p class="section-desc">Add new content to your collection</p>
+                
+                <div class="create-grid">
+                    <div class="create-card" onclick="app.openModal('video')">
+                        <div class="create-icon">🎬</div>
+                        <h3>Add Video</h3>
+                        <p>Save a video from any supported site</p>
+                    </div>
+                    
+                    <div class="create-card" onclick="app.openModal('creator')">
+                        <div class="create-icon">⭐</div>
+                        <h3>Add Creator</h3>
+                        <p>Save an artist, model, or channel</p>
+                    </div>
+                    
+                    <div class="create-card" onclick="app.openModal('playlist')">
+                        <div class="create-icon">📁</div>
+                        <h3>New Playlist</h3>
+                        <p>Create a playlist to organize videos</p>
+                    </div>
+                    
+                    <div class="create-card" onclick="app.openModal('site')">
+                        <div class="create-icon">🔗</div>
+                        <h3>Add Site</h3>
+                        <p>Add a quick link shortcut</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Favorites Section -->
+            <section id="favorites" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">❤️</span>
+                        <h2>Favorites</h2>
+                    </div>
+                    <button class="add-btn secondary" onclick="app.clearFavorites()">Clear All</button>
+                </div>
+                <div class="videos-grid" id="favoritesGrid"></div>
+            </section>
+
+            <!-- Subscriptions/Creators Section -->
+            <section id="subscriptions" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">⭐</span>
+                        <h2>Saved Creators</h2>
+                    </div>
+                </div>
+                <div class="creator-filters">
+                    <button class="filter-btn active" data-filter="all" onclick="app.filterCreators('all')">All</button>
+                    <button class="filter-btn" data-filter="artist" onclick="app.filterCreators('artist')">Artists</button>
+                    <button class="filter-btn" data-filter="model" onclick="app.filterCreators('model')">Models</button>
+                    <button class="filter-btn" data-filter="channel" onclick="app.filterCreators('channel')">Channels</button>
+                    <button class="filter-btn" data-filter="studio" onclick="app.filterCreators('studio')">Studios</button>
+                </div>
+                <div class="subscriptions-grid" id="subscriptionsGrid"></div>
+                <div class="section-header" style="margin-top: 30px;">
+                    <div class="section-title">
+                        <span class="icon">🎬</span>
+                        <h2>Videos from Saved Creators</h2>
+                    </div>
+                </div>
+                <div class="videos-grid" id="subscriptionVideosGrid"></div>
+            </section>
+
+            <!-- Playlists Section -->
+            <section id="playlists" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">📁</span>
+                        <h2>Playlists</h2>
+                    </div>
+                    <button class="add-btn secondary" onclick="app.clearPlaylists()">Clear All</button>
+                </div>
+                <div class="playlists-grid" id="playlistsGrid"></div>
+            </section>
+
+            <!-- Watch Later Section -->
+            <section id="watchlater" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">⏱️</span>
+                        <h2>Watch Later</h2>
+                    </div>
+                    <button class="add-btn secondary" onclick="app.clearWatchLater()">Clear All</button>
+                </div>
+                <div class="videos-grid" id="watchLaterGrid"></div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">📜</span>
+                        <h2>Watch History</h2>
+                    </div>
+                    <button class="add-btn secondary" onclick="app.clearHistory()">Clear History</button>
+                </div>
+                <div class="videos-grid" id="historyGrid"></div>
+            </section>
+
+            <!-- Playlist View Section -->
+            <section id="playlistView" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <button class="back-link" onclick="app.switchTab('playlists')">← Back</button>
+                        <span class="icon">📁</span>
+                        <h2 id="playlistViewTitle">Playlist</h2>
+                    </div>
+                    <div class="playlist-actions">
+                        <button class="add-btn secondary" onclick="app.editCurrentPlaylist()">✏️ Edit</button>
+                        <button class="add-btn danger" onclick="app.deleteCurrentPlaylist()">🗑️ Delete</button>
+                    </div>
+                </div>
+                <p class="playlist-description" id="playlistViewDesc"></p>
+                <div class="videos-grid" id="playlistVideosGrid"></div>
+            </section>
+
+            <!-- Sites Section -->
+            <section id="sites" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">🔗</span>
+                        <h2>Quick Links</h2>
+                    </div>
+                </div>
+                <div class="sites-grid" id="sitesGrid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Site Modal -->
+    <div class="modal" id="siteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Site</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="siteForm">
+                <div class="form-group">
+                    <label for="siteName">Name</label>
+                    <input type="text" id="siteName" required placeholder="e.g., Reddit">
+                </div>
+                <div class="form-group">
+                    <label for="siteUrl">URL</label>
+                    <input type="url" id="siteUrl" required placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="siteColor">Color</label>
+                    <input type="color" id="siteColor" value="#D99BA1">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Video Modal -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Video</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="videoForm">
+                <div class="form-group">
+                    <label for="videoUrl">URL</label>
+                    <div class="input-with-btn">
+                        <input type="url" id="videoUrl" required placeholder="Paste video URL here...">
+                        <button type="button" class="fetch-btn" onclick="app.fetchVideoMetadata()" id="fetchBtn">
+                            <span class="fetch-text">Fetch Info</span>
+                        </button>
+                    </div>
+                    <small class="fetch-hint">Paste a URL and click "Fetch Info" to auto-fill details</small>
+                </div>
+                <div class="form-group">
+                    <label for="videoTitle">Title</label>
+                    <input type="text" id="videoTitle" required placeholder="Video title">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="videoDuration">Duration</label>
+                        <input type="text" id="videoDuration" placeholder="12:34">
+                    </div>
+                    <div class="form-group">
+                        <label for="videoChannel">Channel/Source</label>
+                        <input type="text" id="videoChannel" placeholder="Channel name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="videoThumb">Thumbnail URL</label>
+                    <div class="thumb-preview-container">
+                        <input type="url" id="videoThumb" placeholder="https://...">
+                        <div class="thumb-preview" id="thumbPreview"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="videoTags">Tags (comma separated)</label>
+                    <input type="text" id="videoTags" placeholder="tag1, tag2, tag3">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create/Edit Playlist Modal -->
+    <div class="modal" id="playlistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="playlistModalTitle">Create Playlist</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="playlistForm">
+                <div class="form-group">
+                    <label for="playlistName">Name</label>
+                    <input type="text" id="playlistName" required placeholder="My Playlist">
+                </div>
+                <div class="form-group">
+                    <label for="playlistDesc">Description (optional)</label>
+                    <textarea id="playlistDesc" placeholder="Describe your playlist..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add to Playlist Modal -->
+    <div class="modal" id="addToPlaylistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add to Playlist</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="playlist-selector" id="playlistSelector">
+                <!-- Playlists will be rendered here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-new-playlist" onclick="app.createPlaylistAndAdd()">+ Create New Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Creator Modal -->
+    <div class="modal" id="creatorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="creatorModalTitle">Add Creator</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="creatorForm">
+                <input type="hidden" id="creatorId">
+                <div class="form-group">
+                    <label for="creatorName">Name *</label>
+                    <input type="text" id="creatorName" required placeholder="Creator name">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="creatorType">Type</label>
+                        <select id="creatorType">
+                            <option value="creator">Creator</option>
+                            <option value="artist">Artist</option>
+                            <option value="model">Model / Pornstar</option>
+                            <option value="channel">Channel</option>
+                            <option value="studio">Studio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="creatorSite">Site/Platform</label>
+                        <input type="text" id="creatorSite" placeholder="e.g., PornHub, Twitter">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="creatorUrl">Profile URL</label>
+                    <input type="url" id="creatorUrl" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="creatorAvatar">Avatar/Image URL</label>
+                    <div class="thumb-preview-container">
+                        <input type="url" id="creatorAvatar" placeholder="https://...">
+                        <div class="thumb-preview" id="creatorAvatarPreview"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="creatorNotes">Notes</label>
+                    <textarea id="creatorNotes" placeholder="Any notes about this creator..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h4>📦 Data Management</h4>
+                    <p class="settings-desc">Export your entire profile including saved videos, playlists, favorites, creators, and settings. Import to restore from a backup.</p>
+                    
+                    <div class="settings-stats" id="settingsStats">
+                        <!-- Stats will be populated by JS -->
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button class="btn-export" onclick="app.exportData()">
+                            <span>📥</span> Export Profile
+                        </button>
+                        <label class="btn-import">
+                            <span>📤</span> Import Profile
+                            <input type="file" id="importFile" accept=".json" onchange="app.importData(event)" hidden>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-section danger-zone">
+                    <h4>⚠️ Danger Zone</h4>
+                    <p class="settings-desc">Permanently delete all your data. This cannot be undone.</p>
+                    <button class="btn-danger" onclick="app.clearAllData()">
+                        🗑️ Clear All Data
+                    </button>
+                    <button class="btn-secondary" onclick="app.resetToDefaults()">
+                        🔄 Reset Sites to Defaults
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget Picker Modal -->
+    <div class="modal" id="widgetPickerModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Add Widget</h3>
+                <button class="close-btn" onclick="app.closeModals()">&times;</button>
+            </div>
+            <div class="widget-picker">
+                <div class="widget-option" onclick="app.addWidget('recentVideos')">
+                    <div class="widget-option-icon">🎬</div>
+                    <div class="widget-option-info">
+                        <h4>Recent Videos</h4>
+                        <p>Display your recently added videos</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('favorites')">
+                    <div class="widget-option-icon">❤️</div>
+                    <div class="widget-option-info">
+                        <h4>Favorites</h4>
+                        <p>Quick access to your favorite videos</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('watchLater')">
+                    <div class="widget-option-icon">⏱️</div>
+                    <div class="widget-option-info">
+                        <h4>Watch Later</h4>
+                        <p>Videos in your watch later queue</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('stats')">
+                    <div class="widget-option-icon">📊</div>
+                    <div class="widget-option-info">
+                        <h4>Stats</h4>
+                        <p>Overview of your collection</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('quickLinks')">
+                    <div class="widget-option-icon">🔗</div>
+                    <div class="widget-option-info">
+                        <h4>Quick Links</h4>
+                        <p>Your saved site shortcuts</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('creators')">
+                    <div class="widget-option-icon">⭐</div>
+                    <div class="widget-option-info">
+                        <h4>Creators</h4>
+                        <p>Your saved creators</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('playlists')">
+                    <div class="widget-option-icon">📁</div>
+                    <div class="widget-option-info">
+                        <h4>Playlists</h4>
+                        <p>Your custom playlists</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('randomVideo')">
+                    <div class="widget-option-icon">🎲</div>
+                    <div class="widget-option-info">
+                        <h4>Random Video</h4>
+                        <p>Discover a random video from your collection</p>
+                    </div>
+                </div>
+                <div class="widget-option" onclick="app.addWidget('allVideos')">
+                    <div class="widget-option-icon">🔥</div>
+                    <div class="widget-option-info">
+                        <h4>All Videos</h4>
+                        <p>Browse all your saved videos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <button class="context-item video-only" data-action="favorite">❤️ <span class="fav-text">Add to Favorites</span></button>
+        <button class="context-item video-only" data-action="watchlater">⏱️ <span class="wl-text">Watch Later</span></button>
+        <button class="context-item video-only" data-action="addtoplaylist">📁 Add to Playlist</button>
+        <div class="context-divider video-only"></div>
+        <button class="context-item" data-action="edit">✏️ Edit</button>
+        <button class="context-item" data-action="delete">🗑️ Delete</button>
+    </div>
+
+    <script src="user.js"></script>
+    <script src="metadata.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

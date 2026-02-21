@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gentlemen's Club - Player</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .player-page {
+            display: block !important;
+            padding: 0 !important;
+        }
+        
+        .not-found {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .not-found h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .not-found p {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .not-found a {
+            background: var(--accent);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .not-found a:hover {
+            background: var(--accent-hover);
+        }
+
+        .action-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Off-Canvas Side Navigation -->
+        <div id="sideNav" class="sidenav">
+            <button class="sidenav-close" onclick="closeSidebar()">&times;</button>
+            <a href="index.html" class="sidenav-logo">
+                <img src="logo.png" alt="Gentlemen's Club">
+            </a>
+            <nav class="sidenav-links">
+                <a href="index.html">🏠 Home</a>
+                <a href="index.html#favorites">❤️ Favorites</a>
+                <a href="index.html#subscriptions">⭐ Creators</a>
+                <a href="index.html#playlists">📁 Playlists</a>
+                <a href="index.html#watchlater">⏱️ Watch Later</a>
+                <a href="index.html#history">📜 History</a>
+                <a href="index.html#sites">🔗 Sites</a>
+            </nav>
+        </div>
+
+        <!-- Overlay for sidenav -->
+        <div id="sideNavOverlay" class="sidenav-overlay" onclick="closeSidebar()"></div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+                    <button class="back-btn" onclick="window.location.href='index.html'">
+                        ← Back
+                    </button>
+                </div>
+                
+                <div class="search-container">
+                    <div class="search-box">
+                        <select id="searchSite" class="search-site-select">
+                            <option value="local">Gentlemen's Club</option>
+                            <optgroup label="Video Sites">
+                                <option value="youtube">YouTube</option>
+                                <option value="pornhub">PornHub</option>
+                                <option value="xvideos">XVideos</option>
+                                <option value="xnxx">XNXX</option>
+                                <option value="xhamster">xHamster</option>
+                                <option value="redtube">RedTube</option>
+                                <option value="youporn">YouPorn</option>
+                                <option value="spankbang">SpankBang</option>
+                                <option value="eporner">Eporner</option>
+                            </optgroup>
+                            <optgroup label="Other">
+                                <option value="reddit">Reddit</option>
+                                <option value="redgifs">RedGifs</option>
+                                <option value="rule34video">Rule34Video</option>
+                                <option value="sfmcompile">SFM Compile</option>
+                            </optgroup>
+                        </select>
+                        <input type="text" id="globalSearch" placeholder="Search Gentlemen's Club...">
+                        <button class="search-btn" onclick="player.executeSearch()">🔍</button>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode" onclick="toggleTheme()">
+                        <img src="dark mode.gif" alt="Toggle theme" id="themeIcon">
+                    </button>
+                    <button class="header-btn" title="Home" onclick="window.location.href='index.html'">🏠</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content">
+            <section class="player-page" id="playerPage">
+                <div class="player-container">
+                    <div class="player-main">
+                        <!-- Video Player -->
+                        <div class="video-player-wrapper">
+                            <div class="video-player" id="videoPlayer">
+                                <div class="player-loading"></div>
+                            </div>
+                            <div class="player-controls">
+                                <button class="player-ctrl-btn" onclick="player.openInPopup()" title="Open in popup window">
+                                    ⧉ Popup
+                                </button>
+                                <button class="player-ctrl-btn" onclick="player.openSource()" title="Open source in new tab">
+                                    ↗ Source
+                                </button>
+                                <button class="player-ctrl-btn" onclick="player.reloadEmbed()" title="Reload embed">
+                                    ↻ Reload
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Video Info -->
+                        <div class="player-info">
+                            <h1 class="player-title" id="playerTitle">Loading...</h1>
+                            
+                            <div class="player-meta-row">
+                                <div class="player-stats">
+                                    <span class="views" id="playerViews">0 Views</span>
+                                    <span class="separator">|</span>
+                                    <span class="date" id="playerDate">Just now</span>
+                                </div>
+                                
+                                <div class="player-actions">
+                                    <button class="action-btn" id="playerLike">
+                                        <span class="icon">👍</span>
+                                        <span id="playerLikeCount">0</span>
+                                    </button>
+                                    <button class="action-btn">
+                                        <span class="icon">👎</span>
+                                    </button>
+                                    <button class="action-btn" id="btnFavorite" onclick="player.toggleFavorite()">
+                                        <span class="icon" id="favIcon">🤍</span>
+                                        <span id="favText">Favorite</span>
+                                    </button>
+                                    <button class="action-btn" id="btnWatchLater" onclick="player.toggleWatchLater()">
+                                        <span class="icon">⏱️</span>
+                                        <span id="wlText">Watch Later</span>
+                                    </button>
+                                    <button class="action-btn" onclick="player.openAddToPlaylist()">
+                                        <span class="icon">📁</span>
+                                        <span>Add to</span>
+                                    </button>
+                                    <button class="action-btn" onclick="player.shareVideo()">
+                                        <span class="icon">↗</span>
+                                        <span>Share</span>
+                                    </button>
+                                    <button class="action-btn source-btn" onclick="player.openSource()">
+                                        <span class="icon">🔗</span>
+                                        <span>Source</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Channel Info -->
+                        <div class="channel-section">
+                            <div class="channel-info" onclick="player.openChannelPage()" style="cursor: pointer;" title="View more from this creator">
+                                <div class="channel-avatar" id="channelAvatar">A</div>
+                                <div class="channel-details">
+                                    <div class="channel-name">
+                                        <span id="channelName">Unknown</span>
+                                        <span class="verified">✓</span>
+                                    </div>
+                                    <div class="channel-stats" id="channelStats">Click to find more videos</div>
+                                </div>
+                            </div>
+                            <div class="channel-actions">
+                                <button class="more-btn" onclick="player.openChannelPage()">More of Me ↗</button>
+                                <button class="subscribe-btn" onclick="player.subscribeChannel()">📡 Subscribe</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Tags -->
+                        <div class="player-tags" id="playerTags"></div>
+                        
+                        <!-- Tabs -->
+                        <div class="player-tabs">
+                            <button class="tab-btn active">Related</button>
+                            <button class="tab-btn">Comments</button>
+                            <button class="tab-btn">Playlist</button>
+                        </div>
+                        
+                        <!-- Related Videos (Mobile/Below) -->
+                        <div class="related-videos-mobile" id="relatedVideosMobile"></div>
+                    </div>
+                    
+                    <!-- Sidebar - Related Videos -->
+                    <aside class="player-sidebar">
+                        <div class="related-videos" id="relatedVideos"></div>
+                    </aside>
+                </div>
+            </section>
+            
+            <!-- Not Found -->
+            <section class="not-found" id="notFound" style="display: none;">
+                <h2>404</h2>
+                <p>Video not found</p>
+                <a href="index.html">Go Home</a>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add to Playlist Modal -->
+    <div class="modal" id="addToPlaylistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add to Playlist</h3>
+                <button class="close-btn" onclick="player.closeModal()">&times;</button>
+            </div>
+            <div class="playlist-selector" id="playlistSelector">
+                <!-- Playlists will be rendered here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-new-playlist" onclick="player.createPlaylistAndAdd()">+ Create New Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="user.js"></script>
+    <script src="player.js"></script>
+</body>
+</html>
