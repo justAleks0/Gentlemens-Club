@@ -1,0 +1,11 @@
+{
+  "type": "site",
+  "exportedAt": "2026-02-21T12:00:00.000Z",
+  "data": {
+    "id": "example1",
+    "name": "Example Site",
+    "url": "https://example.com",
+    "logo": "",
+    "color": "#D99BA1"
+  }
+}

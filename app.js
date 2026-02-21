@@ -11,6 +11,9 @@ class GentlemensClub {
         this.activeTag = null;
         this.videoFilter = '';
         this.currentPlaylistId = null;
+        this.currentJukeboxCategory = 'Video';
+        this.jukeboxCache = {};
+        this.jukeboxLoading = false;
         this.addToPlaylistVideoId = null;
         this.currentTheme = localStorage.getItem('gentlemensclub_theme') || 'dark';
         this.widgets = JSON.parse(localStorage.getItem('gentlemensclub_widgets')) || this.getDefaultWidgets();
@@ -401,7 +404,7 @@ class GentlemensClub {
         const hash = window.location.hash.replace('#', '');
 
         // Handle hash-based tab navigation
-        const validTabs = ['home', 'videos', 'search', 'create', 'favorites', 'subscriptions', 'playlists', 'watchlater', 'history', 'sites'];
+        const validTabs = ['home', 'videos', 'search', 'create', 'jukebox', 'favorites', 'subscriptions', 'playlists', 'watchlater', 'history', 'sites'];
         if (hash && validTabs.includes(hash)) {
             this.switchTab(hash);
         }
@@ -559,6 +562,9 @@ class GentlemensClub {
                 }, 100);
                 break;
             case 'create':
+                break;
+            case 'jukebox':
+                this.renderJukebox();
                 break;
             case 'favorites':
                 this.renderFavorites();
@@ -1764,6 +1770,307 @@ class GentlemensClub {
             a.click();
             URL.revokeObjectURL(url);
         }
+    }
+
+    // ==================== THE JUKEBOX (Marketplace) ====================
+    
+    switchJukeboxCategory(category) {
+        this.currentJukeboxCategory = category;
+        
+        document.querySelectorAll('.jukebox-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.category === category);
+        });
+        
+        this.renderJukebox();
+    }
+    
+    async renderJukebox() {
+        const grid = document.getElementById('jukeboxGrid');
+        const loading = document.getElementById('jukeboxLoading');
+        const error = document.getElementById('jukeboxError');
+        
+        // Check cache first
+        if (this.jukeboxCache[this.currentJukeboxCategory]) {
+            loading.style.display = 'none';
+            error.style.display = 'none';
+            this.renderJukeboxItems(this.jukeboxCache[this.currentJukeboxCategory]);
+            return;
+        }
+        
+        // Show loading
+        loading.style.display = 'flex';
+        error.style.display = 'none';
+        grid.innerHTML = '';
+        
+        try {
+            const items = await this.fetchJukeboxItems(this.currentJukeboxCategory);
+            this.jukeboxCache[this.currentJukeboxCategory] = items;
+            loading.style.display = 'none';
+            this.renderJukeboxItems(items);
+        } catch (err) {
+            console.error('Failed to load Jukebox items:', err);
+            loading.style.display = 'none';
+            error.style.display = 'flex';
+        }
+    }
+    
+    async fetchJukeboxItems(category) {
+        const baseUrl = 'https://api.github.com/repos/justAleks0/Gentlemens-Club/contents/The%20Jukebox/' + category;
+        
+        // Fetch directory listing
+        const response = await fetch(baseUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.status}`);
+        }
+        
+        const files = await response.json();
+        const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+        
+        // Fetch each JSON file's content
+        const items = await Promise.all(
+            jsonFiles.map(async (file) => {
+                try {
+                    const contentResponse = await fetch(file.download_url);
+                    if (!contentResponse.ok) return null;
+                    const content = await contentResponse.json();
+                    return {
+                        ...content,
+                        _filename: file.name,
+                        _sha: file.sha
+                    };
+                } catch (e) {
+                    console.error(`Failed to load ${file.name}:`, e);
+                    return null;
+                }
+            })
+        );
+        
+        return items.filter(Boolean);
+    }
+    
+    renderJukeboxItems(items) {
+        const grid = document.getElementById('jukeboxGrid');
+        
+        if (items.length === 0) {
+            grid.innerHTML = `
+                <div class="jukebox-empty">
+                    <div class="icon">📭</div>
+                    <p>No ${this.currentJukeboxCategory.toLowerCase()}s available yet.<br>Be the first to share one!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        grid.innerHTML = items.map(item => this.renderJukeboxItem(item)).join('');
+    }
+    
+    renderJukeboxItem(item) {
+        const type = item.type || this.currentJukeboxCategory.toLowerCase();
+        const data = item.data || item;
+        
+        let icon = '📦';
+        let name = data.name || data.title || 'Unnamed';
+        let description = '';
+        let meta = '';
+        let thumbnail = '';
+        
+        switch(type) {
+            case 'video':
+                icon = '🎬';
+                name = data.title || 'Untitled Video';
+                description = data.channel ? `By ${data.channel}` : '';
+                meta = data.duration || '';
+                thumbnail = data.thumbnail || '';
+                break;
+            case 'site':
+                icon = '🔗';
+                name = data.name || 'Unnamed Site';
+                description = data.url || '';
+                thumbnail = data.logo || '';
+                break;
+            case 'creator':
+                icon = '⭐';
+                name = data.name || 'Unknown Creator';
+                description = data.site ? `Active on ${data.site}` : '';
+                meta = data.type || '';
+                thumbnail = data.avatarUrl || '';
+                if (item.videoCount) {
+                    meta += ` • ${item.videoCount} videos included`;
+                }
+                break;
+            case 'playlist':
+                icon = '📁';
+                name = data.name || 'Unnamed Playlist';
+                description = data.description || '';
+                meta = item.videoCount ? `${item.videoCount} videos` : `${(data.videos || data.videoIds || []).length} videos`;
+                break;
+        }
+        
+        const tags = data.tags && data.tags.length > 0 
+            ? `<div class="jukebox-item-tags">${data.tags.slice(0, 5).map(t => `<span class="jukebox-item-tag">${this.escapeHtml(t)}</span>`).join('')}</div>` 
+            : '';
+        
+        const alreadyHas = this.checkIfAlreadyHas(type, data);
+        
+        return `
+            <div class="jukebox-item" data-type="${type}">
+                <div class="jukebox-item-header">
+                    <div class="jukebox-item-icon">
+                        ${thumbnail ? `<img src="${this.escapeHtml(thumbnail)}" alt="" onerror="this.outerHTML='${icon}'">` : icon}
+                    </div>
+                    <div class="jukebox-item-info">
+                        <div class="jukebox-item-name">${this.escapeHtml(name)}</div>
+                        <div class="jukebox-item-meta">${this.escapeHtml(meta)}</div>
+                    </div>
+                </div>
+                ${description ? `<div class="jukebox-item-desc">${this.escapeHtml(description)}</div>` : ''}
+                ${tags}
+                <div class="jukebox-item-footer">
+                    <button class="jukebox-btn primary" onclick="app.importJukeboxItem('${type}', '${item._filename}')" ${alreadyHas ? 'disabled' : ''}>
+                        ${alreadyHas ? '✓ Already Added' : '⬇️ Import'}
+                    </button>
+                    ${type === 'video' && data.url ? `<button class="jukebox-btn secondary" onclick="window.open('${this.escapeHtml(data.url)}', '_blank')">🔗 View</button>` : ''}
+                    ${type === 'creator' && data.profileUrl ? `<button class="jukebox-btn secondary" onclick="window.open('${this.escapeHtml(data.profileUrl)}', '_blank')">🔗 Profile</button>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    checkIfAlreadyHas(type, data) {
+        switch(type) {
+            case 'video':
+                return this.videos.some(v => v.url === data.url || v.title === data.title);
+            case 'site':
+                return this.sites.some(s => s.url === data.url || s.name === data.name);
+            case 'creator':
+                const creators = user.getSubscriptions();
+                return creators.some(c => c.name === data.name);
+            case 'playlist':
+                const playlists = user.getAllPlaylists();
+                return playlists.some(p => p.name === data.name);
+            default:
+                return false;
+        }
+    }
+    
+    async importJukeboxItem(type, filename) {
+        const items = this.jukeboxCache[this.currentJukeboxCategory];
+        const item = items.find(i => i._filename === filename);
+        
+        if (!item) {
+            alert('Item not found');
+            return;
+        }
+        
+        const data = item.data || item;
+        
+        try {
+            switch(type) {
+                case 'video':
+                    const newVideo = {
+                        id: Date.now().toString(),
+                        title: data.title || 'Imported Video',
+                        url: data.url || '',
+                        thumbnail: data.thumbnail || '',
+                        duration: data.duration || '',
+                        channel: data.channel || '',
+                        tags: data.tags || [],
+                        addedAt: new Date().toISOString()
+                    };
+                    this.videos.unshift(newVideo);
+                    this.saveVideos();
+                    break;
+                    
+                case 'site':
+                    const newSite = {
+                        id: Date.now().toString(),
+                        name: data.name || 'Imported Site',
+                        url: data.url || '',
+                        logo: data.logo || '',
+                        color: data.color || '#D99BA1'
+                    };
+                    this.sites.push(newSite);
+                    this.saveSites();
+                    break;
+                    
+                case 'creator':
+                    const creatorData = {
+                        name: data.name || 'Imported Creator',
+                        type: data.type || 'creator',
+                        site: data.site || '',
+                        profileUrl: data.profileUrl || '',
+                        avatarUrl: data.avatarUrl || '',
+                        notes: data.notes || ''
+                    };
+                    user.addCreator(creatorData);
+                    
+                    // Also import included videos if any
+                    if (item.videos && item.videos.length > 0) {
+                        for (const video of item.videos) {
+                            if (!this.videos.some(v => v.url === video.url)) {
+                                this.videos.unshift({
+                                    ...video,
+                                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                                    addedAt: new Date().toISOString()
+                                });
+                            }
+                        }
+                        this.saveVideos();
+                    }
+                    break;
+                    
+                case 'playlist':
+                    // First import any included videos
+                    const videoIdMap = {};
+                    if (item.videos && item.videos.length > 0) {
+                        for (const video of item.videos) {
+                            const existingVideo = this.videos.find(v => v.url === video.url);
+                            if (existingVideo) {
+                                videoIdMap[video.id] = existingVideo.id;
+                            } else {
+                                const newId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                                videoIdMap[video.id] = newId;
+                                this.videos.unshift({
+                                    ...video,
+                                    id: newId,
+                                    addedAt: new Date().toISOString()
+                                });
+                            }
+                        }
+                        this.saveVideos();
+                    }
+                    
+                    // Create playlist with mapped video IDs
+                    const originalIds = data.videoIds || data.videos || [];
+                    const mappedIds = originalIds.map(id => videoIdMap[id] || id).filter(Boolean);
+                    
+                    const newPlaylist = user.createPlaylist(
+                        data.name || 'Imported Playlist',
+                        data.description || ''
+                    );
+                    
+                    // Add videos to playlist
+                    for (const videoId of mappedIds) {
+                        user.addToPlaylist(newPlaylist.id, videoId);
+                    }
+                    break;
+            }
+            
+            // Refresh the jukebox display to update button states
+            this.renderJukeboxItems(this.jukeboxCache[this.currentJukeboxCategory]);
+            
+            alert(`Successfully imported ${type}!`);
+            
+        } catch (err) {
+            console.error('Import failed:', err);
+            alert('Failed to import item. Please try again.');
+        }
+    }
+    
+    refreshJukebox() {
+        // Clear cache for current category
+        delete this.jukeboxCache[this.currentJukeboxCategory];
+        this.renderJukebox();
     }
 
     filterByTag(tag) {

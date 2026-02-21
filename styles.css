@@ -3146,6 +3146,238 @@ form {
     color: var(--text-primary);
 }
 
+/* The Jukebox (Marketplace) */
+.sidenav-jukebox {
+    background: linear-gradient(135deg, var(--accent) 0%, #ff6b9d 100%);
+    color: #000 !important;
+    font-weight: bold;
+    border-radius: 8px;
+    margin: 5px 10px;
+    padding: 12px 16px !important;
+}
+
+.sidenav-jukebox:hover {
+    filter: brightness(1.1);
+}
+
+.jukebox-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.jukebox-tab {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+
+.jukebox-tab:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.jukebox-tab.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: bold;
+}
+
+.jukebox-content {
+    min-height: 300px;
+}
+
+.jukebox-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.jukebox-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--bg-tertiary);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.jukebox-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.jukebox-error .icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.jukebox-error p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.jukebox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.jukebox-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.jukebox-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.jukebox-item-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.jukebox-item-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.jukebox-item-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.jukebox-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.jukebox-item-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+.jukebox-item-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.jukebox-item-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.jukebox-item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.jukebox-item-tag {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+}
+
+.jukebox-item-footer {
+    display: flex;
+    gap: 10px;
+}
+
+.jukebox-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: all 0.15s ease;
+}
+
+.jukebox-btn.primary {
+    background: var(--accent);
+    color: #000;
+}
+
+.jukebox-btn.primary:hover {
+    background: var(--accent-hover);
+}
+
+.jukebox-btn.secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.jukebox-btn.secondary:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.jukebox-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.jukebox-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.jukebox-empty .icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
 /* Responsive */
 @media (max-width: 1100px) {
     .player-container {

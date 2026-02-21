@@ -38,6 +38,7 @@
                 <a href="#" onclick="app.switchTab('videos'); app.closeSidebar();">🎬 Videos</a>
                 <a href="#" onclick="app.switchTab('search'); app.closeSidebar();">🔍 Search</a>
                 <a href="#" onclick="app.switchTab('create'); app.closeSidebar();" class="sidenav-create">➕ Create</a>
+                <a href="#" onclick="app.switchTab('jukebox'); app.closeSidebar();" class="sidenav-jukebox">🎵 The Jukebox</a>
                 <div class="sidenav-divider"></div>
                 <a href="#" onclick="app.switchTab('favorites'); app.closeSidebar();">❤️ Favorites</a>
                 <a href="#" onclick="app.switchTab('subscriptions'); app.closeSidebar();">⭐ Creators</a>
@@ -186,6 +187,38 @@
                         <h3>Add Site</h3>
                         <p>Add a quick link shortcut</p>
                     </div>
+                </div>
+            </section>
+
+            <!-- The Jukebox (Marketplace) Section -->
+            <section id="jukebox" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">🎵</span>
+                        <h2>The Jukebox</h2>
+                    </div>
+                    <button class="add-btn" onclick="app.refreshJukebox()">🔄 Refresh</button>
+                </div>
+                <p class="section-desc">Browse and import community-shared content</p>
+                
+                <div class="jukebox-tabs">
+                    <button class="jukebox-tab active" data-category="Video" onclick="app.switchJukeboxCategory('Video')">🎬 Videos</button>
+                    <button class="jukebox-tab" data-category="Site" onclick="app.switchJukeboxCategory('Site')">🔗 Sites</button>
+                    <button class="jukebox-tab" data-category="Creator" onclick="app.switchJukeboxCategory('Creator')">⭐ Creators</button>
+                    <button class="jukebox-tab" data-category="Playlist" onclick="app.switchJukeboxCategory('Playlist')">📁 Playlists</button>
+                </div>
+                
+                <div class="jukebox-content">
+                    <div id="jukeboxLoading" class="jukebox-loading">
+                        <div class="spinner"></div>
+                        <p>Loading from The Jukebox...</p>
+                    </div>
+                    <div id="jukeboxError" class="jukebox-error" style="display: none;">
+                        <div class="icon">⚠️</div>
+                        <p>Failed to load items. Check your connection or try again.</p>
+                        <button class="add-btn" onclick="app.refreshJukebox()">Retry</button>
+                    </div>
+                    <div id="jukeboxGrid" class="jukebox-grid"></div>
                 </div>
             </section>
 
