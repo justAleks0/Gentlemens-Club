@@ -28,19 +28,19 @@ class GentlemensClub {
     
     getDefaultSites() {
         return [
-            { id: 'yt', name: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000' },
-            { id: 'ph', name: 'PornHub', url: 'https://www.pornhub.com', color: '#ff9000' },
-            { id: 'xv', name: 'XVideos', url: 'https://www.xvideos.com', color: '#c40808' },
-            { id: 'xn', name: 'XNXX', url: 'https://www.xnxx.com', color: '#ed1c24' },
-            { id: 'xh', name: 'xHamster', url: 'https://xhamster.com', color: '#f68b1f' },
-            { id: 'rt', name: 'RedTube', url: 'https://www.redtube.com', color: '#d21f1f' },
-            { id: 'yp', name: 'YouPorn', url: 'https://www.youporn.com', color: '#c2004d' },
-            { id: 'sb', name: 'SpankBang', url: 'https://spankbang.com', color: '#e53935' },
-            { id: 'ep', name: 'Eporner', url: 'https://www.eporner.com', color: '#1e88e5' },
-            { id: 'rd', name: 'Reddit', url: 'https://www.reddit.com', color: '#ff4500' },
-            { id: 'rg', name: 'RedGifs', url: 'https://www.redgifs.com', color: '#ff0044' },
-            { id: 'r34', name: 'Rule34Video', url: 'https://rule34video.com', color: '#aad450' },
-            { id: 'sfm', name: 'SFM Compile', url: 'https://sfmcompile.club', color: '#9c27b0' },
+            { id: 'yt', name: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', logo: 'https://www.google.com/s2/favicons?domain=youtube.com&sz=128' },
+            { id: 'ph', name: 'PornHub', url: 'https://www.pornhub.com', color: '#ff9000', logo: 'https://www.google.com/s2/favicons?domain=pornhub.com&sz=128' },
+            { id: 'xv', name: 'XVideos', url: 'https://www.xvideos.com', color: '#c40808', logo: 'https://www.google.com/s2/favicons?domain=xvideos.com&sz=128' },
+            { id: 'xn', name: 'XNXX', url: 'https://www.xnxx.com', color: '#ed1c24', logo: 'https://www.google.com/s2/favicons?domain=xnxx.com&sz=128' },
+            { id: 'xh', name: 'xHamster', url: 'https://xhamster.com', color: '#f68b1f', logo: 'https://www.google.com/s2/favicons?domain=xhamster.com&sz=128' },
+            { id: 'rt', name: 'RedTube', url: 'https://www.redtube.com', color: '#d21f1f', logo: 'https://www.google.com/s2/favicons?domain=redtube.com&sz=128' },
+            { id: 'yp', name: 'YouPorn', url: 'https://www.youporn.com', color: '#c2004d', logo: 'https://www.google.com/s2/favicons?domain=youporn.com&sz=128' },
+            { id: 'sb', name: 'SpankBang', url: 'https://spankbang.com', color: '#e53935', logo: 'https://www.google.com/s2/favicons?domain=spankbang.com&sz=128' },
+            { id: 'ep', name: 'Eporner', url: 'https://www.eporner.com', color: '#1e88e5', logo: 'https://www.google.com/s2/favicons?domain=eporner.com&sz=128' },
+            { id: 'rd', name: 'Reddit', url: 'https://www.reddit.com', color: '#ff4500', logo: 'https://www.google.com/s2/favicons?domain=reddit.com&sz=128' },
+            { id: 'rg', name: 'RedGifs', url: 'https://www.redgifs.com', color: '#ff0044', logo: 'https://www.google.com/s2/favicons?domain=redgifs.com&sz=128' },
+            { id: 'r34', name: 'Rule34Video', url: 'https://rule34video.com', color: '#aad450', logo: 'https://www.google.com/s2/favicons?domain=rule34video.com&sz=128' },
+            { id: 'sfm', name: 'SFM Compile', url: 'https://sfmcompile.club', color: '#9c27b0', logo: 'https://www.google.com/s2/favicons?domain=sfmcompile.club&sz=128' },
         ];
     }
 
@@ -302,7 +302,11 @@ class GentlemensClub {
             <div class="quick-links-grid">
                 ${this.sites.slice(0, 12).map(site => `
                     <a href="${this.escapeHtml(site.url)}" target="_blank" class="quick-link-item">
-                        <div class="quick-link-icon" style="background: ${site.color}">${site.name.charAt(0).toUpperCase()}</div>
+                        <div class="quick-link-icon" style="background: ${site.color}">
+                            ${site.logo 
+                                ? `<img src="${this.escapeHtml(site.logo)}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span style="display:none">${site.name.charAt(0).toUpperCase()}</span>`
+                                : site.name.charAt(0).toUpperCase()}
+                        </div>
                         <span class="quick-link-name">${this.escapeHtml(site.name)}</span>
                     </a>
                 `).join('')}
@@ -371,9 +375,13 @@ class GentlemensClub {
     
     renderWidgetVideoCard(video) {
         return `
-            <div class="video-card" onclick="app.openVideo('${video.id}')" oncontextmenu="app.showContextMenu(event, 'video', '${video.id}')">
+            <div class="video-card" data-id="${video.id}" onclick="app.openVideo('${video.id}')" oncontextmenu="app.showContextMenu(event, 'video', '${video.id}')">
+                <div class="card-actions">
+                    <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('video', '${video.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('video', '${video.id}')" title="Delete">🗑️</button>
+                </div>
                 <div class="video-thumb">
-                    ${video.thumbnail 
+                    ${video.thumbnail
                         ? `<img src="${this.escapeHtml(video.thumbnail)}" alt="" loading="lazy">`
                         : '<span class="placeholder">▶</span>'}
                     ${video.duration ? `<span class="video-duration">${this.escapeHtml(video.duration)}</span>` : ''}
@@ -388,16 +396,25 @@ class GentlemensClub {
 
     handleUrlParams() {
         const params = new URLSearchParams(window.location.search);
-        
+        const hash = window.location.hash.replace('#', '');
+
+        // Handle hash-based tab navigation
+        const validTabs = ['videos', 'search', 'create', 'favorites', 'subscriptions', 'playlists', 'watchlater', 'history', 'sites'];
+        if (hash && validTabs.includes(hash)) {
+            this.switchTab(hash);
+        }
+
         const tag = params.get('tag');
         if (tag) {
             this.activeTag = tag;
         }
-        
+
         const search = params.get('search');
         if (search) {
+            this.switchTab('search');
+            document.getElementById('searchSite').value = 'local';
             document.getElementById('globalSearch').value = search;
-            setTimeout(() => this.handleSearch(search), 100);
+            setTimeout(() => this.searchLocal(search), 100);
         }
 
         const playlist = params.get('playlist');
@@ -411,6 +428,9 @@ class GentlemensClub {
         document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
             btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
         });
+        
+        // Long press duration (ms)
+        this.longPressDuration = 500;
 
 
         // Modal close buttons
@@ -438,31 +458,44 @@ class GentlemensClub {
         document.getElementById('creatorAvatar').addEventListener('input', (e) => {
             this.updateCreatorAvatarPreview(e.target.value);
         });
-
-        // Global search
-        document.getElementById('globalSearch').addEventListener('input', (e) => {
-            if (document.getElementById('searchSite').value === 'local') {
-                this.handleSearch(e.target.value);
-            }
-        });
         
-        document.getElementById('globalSearch').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.executeSearch();
-            }
+        // Site logo preview
+        document.getElementById('siteLogo').addEventListener('input', (e) => {
+            this.updateSiteLogoPreview(e.target.value);
         });
+
+        // Global search - live search for local only
+        const globalSearchInput = document.getElementById('globalSearch');
+        if (globalSearchInput) {
+            globalSearchInput.addEventListener('input', (e) => {
+                if (document.getElementById('searchSite').value === 'local' && e.target.value.length >= 2) {
+                    this.searchLocal(e.target.value);
+                }
+            });
+        }
+        
+        if (globalSearchInput) {
+            globalSearchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.executeSearch();
+                }
+            });
+        }
         
         // Update placeholder when site changes
-        document.getElementById('searchSite').addEventListener('change', (e) => {
-            const site = e.target.value;
-            const input = document.getElementById('globalSearch');
-            if (site === 'local') {
-                input.placeholder = 'Search Gentlemen\'s Club...';
-            } else {
-                const siteName = e.target.options[e.target.selectedIndex].text;
-                input.placeholder = `Search ${siteName}...`;
-            }
-        });
+        const searchSiteSelect = document.getElementById('searchSite');
+        if (searchSiteSelect) {
+            searchSiteSelect.addEventListener('change', (e) => {
+                const site = e.target.value;
+                const input = document.getElementById('globalSearch');
+                if (site === 'local') {
+                    input.placeholder = 'Search your library...';
+                } else {
+                    const siteName = e.target.options[e.target.selectedIndex].text;
+                    input.placeholder = `Search ${siteName}...`;
+                }
+            });
+        }
 
         // Context menu actions
         document.querySelectorAll('.context-item').forEach(item => {
@@ -513,6 +546,13 @@ class GentlemensClub {
         switch(this.currentTab) {
             case 'videos':
                 this.renderWidgets();
+                break;
+            case 'search':
+                // Search tab - focus the input
+                setTimeout(() => {
+                    const input = document.getElementById('globalSearch');
+                    if (input) input.focus();
+                }, 100);
                 break;
             case 'create':
                 // Create section is static HTML
@@ -785,6 +825,144 @@ class GentlemensClub {
         preview.classList.add('has-image');
         preview.innerHTML = `<img src="${this.escapeHtml(url)}" alt="Preview" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>❌ Invalid</span>'">`;
     }
+    
+    updateSiteLogoPreview(url) {
+        const preview = document.getElementById('siteLogoPreview');
+        if (!preview) return;
+        
+        if (!url) {
+            preview.classList.remove('has-image');
+            preview.innerHTML = '';
+            return;
+        }
+        
+        preview.classList.add('has-image');
+        preview.innerHTML = `<img src="${this.escapeHtml(url)}" alt="Logo" onerror="this.parentElement.classList.remove('has-image'); this.parentElement.innerHTML='';">`;
+    }
+    
+    setupLongPress(element, type, id) {
+        let pressTimer = null;
+        let isLongPress = false;
+        
+        const startPress = (e) => {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                element.classList.add('long-press-active');
+                navigator.vibrate && navigator.vibrate(50);
+                this.editItem(type, id);
+            }, this.longPressDuration);
+        };
+        
+        const endPress = (e) => {
+            clearTimeout(pressTimer);
+            element.classList.remove('long-press-active');
+            if (isLongPress) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+        
+        const cancelPress = () => {
+            clearTimeout(pressTimer);
+            element.classList.remove('long-press-active');
+        };
+        
+        // Mouse events
+        element.addEventListener('mousedown', startPress);
+        element.addEventListener('mouseup', endPress);
+        element.addEventListener('mouseleave', cancelPress);
+        
+        // Touch events
+        element.addEventListener('touchstart', startPress, { passive: true });
+        element.addEventListener('touchend', endPress);
+        element.addEventListener('touchcancel', cancelPress);
+        element.addEventListener('touchmove', cancelPress, { passive: true });
+        
+        // Prevent click if long press
+        element.addEventListener('click', (e) => {
+            if (isLongPress) {
+                e.preventDefault();
+                e.stopPropagation();
+                isLongPress = false;
+            }
+        }, true);
+    }
+    
+    bindLongPressToItems() {
+        // Sites
+        document.querySelectorAll('.site-card[data-id]').forEach(card => {
+            if (!card.dataset.longPressBound) {
+                this.setupLongPress(card, 'site', card.dataset.id);
+                card.dataset.longPressBound = 'true';
+            }
+        });
+        
+        // Videos
+        document.querySelectorAll('.video-card[data-id]').forEach(card => {
+            if (!card.dataset.longPressBound) {
+                this.setupLongPress(card, 'video', card.dataset.id);
+                card.dataset.longPressBound = 'true';
+            }
+        });
+        
+        // Playlists
+        document.querySelectorAll('.playlist-card[data-id]').forEach(card => {
+            if (!card.dataset.longPressBound) {
+                this.setupLongPress(card, 'playlist', card.dataset.id);
+                card.dataset.longPressBound = 'true';
+            }
+        });
+        
+        // Creators (subscription cards)
+        document.querySelectorAll('.subscription-card[data-id]').forEach(card => {
+            if (!card.dataset.longPressBound) {
+                this.setupLongPress(card, 'creator', card.dataset.id);
+                card.dataset.longPressBound = 'true';
+            }
+        });
+    }
+    
+    async fetchSiteInfo() {
+        const urlInput = document.getElementById('siteUrl');
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            alert('Please enter a URL first');
+            return;
+        }
+        
+        try {
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname.replace('www.', '');
+            
+            // Auto-fill name from hostname
+            const nameInput = document.getElementById('siteName');
+            if (!nameInput.value) {
+                const siteName = hostname.split('.')[0];
+                nameInput.value = siteName.charAt(0).toUpperCase() + siteName.slice(1);
+            }
+            
+            // Try multiple favicon sources
+            const faviconUrls = [
+                `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`,
+                `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+                `${urlObj.origin}/favicon.ico`,
+                `${urlObj.origin}/favicon.png`,
+                `https://favicon.twenty.com/${hostname}`
+            ];
+            
+            const logoInput = document.getElementById('siteLogo');
+            
+            // Use Google's favicon service as it's most reliable
+            logoInput.value = faviconUrls[0];
+            this.updateSiteLogoPreview(faviconUrls[0]);
+            
+        } catch (e) {
+            console.error('Error fetching site info:', e);
+            alert('Invalid URL');
+        }
+    }
 
     openModal(type) {
         if (type === 'playlist') {
@@ -860,21 +1038,39 @@ class GentlemensClub {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.classList.remove('active');
         });
-        
+
         document.getElementById('siteForm').reset();
         document.getElementById('videoForm').reset();
         document.getElementById('playlistForm').reset();
         document.getElementById('creatorForm').reset();
         document.getElementById('siteColor').value = '#D99BA1';
         this.editingCreator = null;
-        
+
         // Clear thumbnail preview
         const thumbPreview = document.getElementById('thumbPreview');
         if (thumbPreview) {
             thumbPreview.classList.remove('has-image');
             thumbPreview.innerHTML = '';
         }
+
+        // Clear site logo preview
+        const logoPreview = document.getElementById('siteLogoPreview');
+        if (logoPreview) {
+            logoPreview.classList.remove('has-image');
+            logoPreview.innerHTML = '';
+        }
         
+        // Clear creator avatar preview
+        const avatarPreview = document.getElementById('creatorAvatarPreview');
+        if (avatarPreview) {
+            avatarPreview.classList.remove('has-image');
+            avatarPreview.innerHTML = '';
+        }
+        
+        // Reset modal titles
+        document.getElementById('playlistModalTitle').textContent = 'Create Playlist';
+        document.getElementById('creatorModalTitle').textContent = 'Add Creator';
+
         this.editingItem = null;
         this.editingPlaylist = null;
         this.addToPlaylistVideoId = null;
@@ -947,7 +1143,9 @@ class GentlemensClub {
                 this.editingItem = { type, id };
                 document.getElementById('siteName').value = site.name;
                 document.getElementById('siteUrl').value = site.url;
-                document.getElementById('siteColor').value = site.color;
+                document.getElementById('siteLogo').value = site.logo || '';
+                document.getElementById('siteColor').value = site.color || '#D99BA1';
+                this.updateSiteLogoPreview(site.logo || '');
                 this.openModal('site');
             }
         } else if (type === 'playlist') {
@@ -959,7 +1157,22 @@ class GentlemensClub {
                 document.getElementById('playlistDesc').value = playlist.description || '';
                 this.openModal('playlist');
             }
-        } else {
+        } else if (type === 'creator') {
+            const creator = user.getCreator(id);
+            if (creator) {
+                this.editingCreator = creator;
+                document.getElementById('creatorModalTitle').textContent = 'Edit Creator';
+                document.getElementById('creatorId').value = creator.id;
+                document.getElementById('creatorName').value = creator.name || '';
+                document.getElementById('creatorType').value = creator.type || 'pornstar';
+                document.getElementById('creatorSite').value = creator.site || '';
+                document.getElementById('creatorUrl').value = creator.profileUrl || '';
+                document.getElementById('creatorAvatar').value = creator.avatarUrl || '';
+                document.getElementById('creatorNotes').value = creator.notes || '';
+                this.updateCreatorAvatarPreview(creator.avatarUrl || '');
+                this.openModal('creator');
+            }
+        } else if (type === 'video') {
             const video = this.videos.find(v => v.id === id);
             if (video) {
                 this.editingItem = { type, id };
@@ -969,12 +1182,12 @@ class GentlemensClub {
                 document.getElementById('videoDuration').value = video.duration || '';
                 document.getElementById('videoChannel').value = video.channel || '';
                 document.getElementById('videoTags').value = video.tags.join(', ');
-                
+
                 // Show thumbnail preview
                 if (video.thumbnail) {
                     this.updateThumbnailPreview(video.thumbnail);
                 }
-                
+
                 this.openModal('video');
             }
         }
@@ -1002,18 +1215,20 @@ class GentlemensClub {
         
         const name = document.getElementById('siteName').value.trim();
         const url = document.getElementById('siteUrl').value.trim();
+        const logo = document.getElementById('siteLogo').value.trim();
         const color = document.getElementById('siteColor').value;
         
         if (this.editingItem && this.editingItem.type === 'site') {
             const index = this.sites.findIndex(s => s.id === this.editingItem.id);
             if (index !== -1) {
-                this.sites[index] = { ...this.sites[index], name, url, color };
+                this.sites[index] = { ...this.sites[index], name, url, logo, color };
             }
         } else {
             this.sites.push({
                 id: Date.now().toString(),
                 name,
                 url,
+                logo,
                 color
             });
         }
@@ -1203,18 +1418,18 @@ class GentlemensClub {
     executeSearch() {
         const site = document.getElementById('searchSite').value;
         const query = document.getElementById('globalSearch').value.trim();
-        
+
         if (!query) return;
-        
+
         if (site === 'local') {
-            this.handleSearch(query);
+            this.searchLocal(query);
             return;
         }
-        
+
         // Encode query - use + for spaces in query params, encode for URL paths
         const queryPlus = encodeURIComponent(query).replace(/%20/g, '+');
         const queryPath = encodeURIComponent(query).replace(/%20/g, '-').toLowerCase();
-        
+
         const searchUrls = {
             youtube: `https://www.youtube.com/results?search_query=${queryPlus}`,
             pornhub: `https://www.pornhub.com/video/search?search=${queryPlus}`,
@@ -1230,10 +1445,166 @@ class GentlemensClub {
             rule34video: `https://rule34video.com/search/${queryPath}/`,
             sfmcompile: `https://sfmcompile.club/?s=${queryPlus}`,
         };
-        
+
+        const siteNames = {
+            youtube: 'YouTube',
+            pornhub: 'PornHub',
+            xvideos: 'XVideos',
+            xnxx: 'XNXX',
+            xhamster: 'xHamster',
+            redtube: 'RedTube',
+            youporn: 'YouPorn',
+            spankbang: 'SpankBang',
+            eporner: 'Eporner',
+            reddit: 'Reddit',
+            redgifs: 'RedGifs',
+            rule34video: 'Rule34Video',
+            sfmcompile: 'SFM Compile',
+        };
+
         const url = searchUrls[site];
         if (url) {
-            window.open(url, '_blank');
+            this.showExternalSearch(url, siteNames[site] || site, query);
+        }
+    }
+    
+    searchLocal(query) {
+        const resultsContainer = document.getElementById('localSearchResults');
+        const frameContainer = document.getElementById('searchFrameContainer');
+        
+        // Hide frame, show local results
+        frameContainer.style.display = 'none';
+        resultsContainer.style.display = 'block';
+        
+        const q = query.toLowerCase();
+        const matchedVideos = this.videos.filter(v => 
+            v.title.toLowerCase().includes(q) ||
+            (v.channel && v.channel.toLowerCase().includes(q)) ||
+            v.tags.some(t => t.toLowerCase().includes(q))
+        );
+        
+        if (matchedVideos.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="search-placeholder">
+                    <div class="search-placeholder-icon">🔍</div>
+                    <h3>No results found</h3>
+                    <p>No videos matching "${this.escapeHtml(query)}" in your library</p>
+                </div>
+            `;
+            return;
+        }
+        
+        resultsContainer.innerHTML = `
+            <div class="local-results-header">
+                <h3>Search Results</h3>
+                <p>${matchedVideos.length} video${matchedVideos.length !== 1 ? 's' : ''} found for "${this.escapeHtml(query)}"</p>
+            </div>
+            <div class="search-results-grid">
+                ${matchedVideos.map(v => this.renderWidgetVideoCard(v)).join('')}
+            </div>
+        `;
+        
+        // Bind long press to new cards
+        requestAnimationFrame(() => this.bindLongPressToItems());
+    }
+    
+    showExternalSearch(url, siteName, query) {
+        const resultsContainer = document.getElementById('localSearchResults');
+        const webviewContainer = document.getElementById('webviewContainer');
+        const webview = document.getElementById('searchWebview');
+        const urlBar = document.getElementById('webviewUrl');
+        
+        // Store for later use
+        this.currentSearchUrl = url;
+        this.currentSearchSite = siteName;
+        this.currentSearchQuery = query;
+        
+        // Hide local results, show webview
+        resultsContainer.style.display = 'none';
+        webviewContainer.style.display = 'flex';
+        
+        // Load the URL in webview
+        webview.src = url;
+        urlBar.textContent = url;
+        
+        // Listen for URL changes
+        webview.addEventListener('did-navigate', (e) => {
+            urlBar.textContent = e.url;
+            this.currentSearchUrl = e.url;
+        });
+        
+        webview.addEventListener('did-navigate-in-page', (e) => {
+            if (e.isMainFrame) {
+                urlBar.textContent = e.url;
+                this.currentSearchUrl = e.url;
+            }
+        });
+    }
+    
+    webviewGoBack() {
+        const webview = document.getElementById('searchWebview');
+        if (webview && webview.canGoBack()) {
+            webview.goBack();
+        }
+    }
+    
+    webviewGoForward() {
+        const webview = document.getElementById('searchWebview');
+        if (webview && webview.canGoForward()) {
+            webview.goForward();
+        }
+    }
+    
+    webviewReload() {
+        const webview = document.getElementById('searchWebview');
+        if (webview) {
+            webview.reload();
+        }
+    }
+    
+    copyWebviewUrl() {
+        if (this.currentSearchUrl) {
+            navigator.clipboard.writeText(this.currentSearchUrl).then(() => {
+                alert('URL copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this URL:', this.currentSearchUrl);
+            });
+        }
+    }
+    
+    openWebviewExternal() {
+        if (this.currentSearchUrl) {
+            // Open in system default browser
+            window.open(this.currentSearchUrl, '_blank');
+        }
+    }
+    
+    closeWebview() {
+        const resultsContainer = document.getElementById('localSearchResults');
+        const webviewContainer = document.getElementById('webviewContainer');
+        const webview = document.getElementById('searchWebview');
+        
+        // Stop loading and clear
+        if (webview) {
+            webview.src = 'about:blank';
+        }
+        
+        webviewContainer.style.display = 'none';
+        resultsContainer.style.display = 'block';
+        
+        // Reset to placeholder
+        resultsContainer.innerHTML = `
+            <div class="search-placeholder">
+                <div class="search-placeholder-icon">🔍</div>
+                <h3>Search your library or the web</h3>
+                <p>Select a site from the dropdown and enter your search query</p>
+            </div>
+        `;
+    }
+    
+    openSearchInNewTab() {
+        if (this.currentSearchUrl) {
+            window.open(this.currentSearchUrl, '_blank');
         }
     }
 
@@ -1272,6 +1643,9 @@ class GentlemensClub {
         this.renderPlaylists();
         this.renderWatchLater();
         this.renderHistory();
+        
+        // Bind long press after DOM updates
+        requestAnimationFrame(() => this.bindLongPressToItems());
     }
 
     renderTags() {
@@ -1294,27 +1668,33 @@ class GentlemensClub {
 
     renderSites() {
         const grid = document.getElementById('sitesGrid');
-        
+
         if (this.sites.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
                     <div class="icon">🔗</div>
-                    <p>No sites yet. Click "+ Add Site" to get started.</p>
+                    <p>No sites yet. Go to Create to add one.</p>
                 </div>
             `;
             return;
         }
-        
+
         grid.innerHTML = this.sites.map(site => `
-            <a href="${this.escapeHtml(site.url)}" 
-               target="_blank" 
+            <a href="${this.escapeHtml(site.url)}"
+               target="_blank"
                rel="noopener noreferrer"
-               class="site-card" 
+               class="site-card"
                data-id="${site.id}"
                data-name="${this.escapeHtml(site.name)}"
                oncontextmenu="app.showContextMenu(event, 'site', '${site.id}')">
+                <div class="card-actions">
+                    <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('site', '${site.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('site', '${site.id}')" title="Delete">🗑️</button>
+                </div>
                 <div class="site-icon" style="background: ${site.color}">
-                    ${site.name.charAt(0).toUpperCase()}
+                    ${site.logo
+                        ? `<img src="${this.escapeHtml(site.logo)}" alt="${this.escapeHtml(site.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span style="display:none">${site.name.charAt(0).toUpperCase()}</span>`
+                        : site.name.charAt(0).toUpperCase()}
                 </div>
                 <div class="site-name">${this.escapeHtml(site.name)}</div>
             </a>
@@ -1420,7 +1800,11 @@ class GentlemensClub {
             ).length;
             
             return `
-                <div class="subscription-card" data-type="${type}" onclick="app.searchChannelVideos('${this.escapeHtml(sub.name)}')">
+                <div class="subscription-card" data-id="${sub.id}" data-type="${type}" onclick="app.searchChannelVideos('${this.escapeHtml(sub.name)}')">
+                    <div class="card-actions">
+                        <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('creator', '${sub.id}')" title="Edit">✏️</button>
+                        <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteCreator('${sub.id}', '${this.escapeHtml(sub.name)}', event)" title="Delete">🗑️</button>
+                    </div>
                     <div class="subscription-avatar">
                         ${sub.avatarUrl 
                             ? `<img src="${this.escapeHtml(sub.avatarUrl)}" alt="${this.escapeHtml(sub.name)}" onerror="this.outerHTML='${sub.name.charAt(0).toUpperCase()}'">` 
@@ -1435,11 +1819,6 @@ class GentlemensClub {
                         ${sub.notes ? `<div class="subscription-notes">${this.escapeHtml(sub.notes)}</div>` : ''}
                         ${sub.profileUrl ? `<a href="${this.escapeHtml(sub.profileUrl)}" target="_blank" class="subscription-link" onclick="event.stopPropagation()">View Profile →</a>` : ''}
                         ${videoCount > 0 ? `<div class="subscription-site">${videoCount} video${videoCount !== 1 ? 's' : ''} in library</div>` : ''}
-                    </div>
-                    <div class="subscription-actions">
-                        <button class="subscription-action-btn" onclick="app.editCreator('${sub.id}', event)" title="Edit">✏️</button>
-                        ${sub.profileUrl ? `<button class="subscription-action-btn" onclick="app.openCreatorProfile('${this.escapeHtml(sub.profileUrl)}', event)" title="Open Profile">🔗</button>` : ''}
-                        <button class="subscription-action-btn delete" onclick="app.deleteCreator('${sub.id}', '${this.escapeHtml(sub.name)}', event)" title="Remove">🗑️</button>
                     </div>
                 </div>
             `;
@@ -1470,10 +1849,11 @@ class GentlemensClub {
     }
 
     searchChannelVideos(channelName) {
-        // Filter videos tab by channel
-        this.switchTab('videos');
+        // Switch to search tab and search locally
+        this.switchTab('search');
+        document.getElementById('searchSite').value = 'local';
         document.getElementById('globalSearch').value = channelName;
-        this.handleSearch(channelName);
+        this.searchLocal(channelName);
     }
 
     unsubscribe(channelName, e) {
@@ -1506,8 +1886,13 @@ class GentlemensClub {
         
         return `
             <div class="playlist-card" 
+                 data-id="${playlist.id}"
                  onclick="app.viewPlaylist('${playlist.id}')"
                  oncontextmenu="app.showContextMenu(event, 'playlist', '${playlist.id}')">
+                <div class="card-actions">
+                    <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('playlist', '${playlist.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('playlist', '${playlist.id}')" title="Delete">🗑️</button>
+                </div>
                 <div class="playlist-thumb">
                     ${videos.slice(0, 2).map(v => `
                         <div class="playlist-thumb-item">
@@ -1543,6 +1928,10 @@ class GentlemensClub {
                  data-channel="${this.escapeHtml(video.channel || '')}"
                  onclick="app.openVideo('${video.id}')"
                  oncontextmenu="app.showContextMenu(event, 'video', '${video.id}')">
+                <div class="card-actions">
+                    <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('video', '${video.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('video', '${video.id}')" title="Delete">🗑️</button>
+                </div>
                 <div class="video-thumb">
                     <div class="video-card-actions">
                         <button class="video-card-action ${isFav ? 'active' : ''}" 

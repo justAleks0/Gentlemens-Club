@@ -23,23 +23,6 @@ class VideoPlayer {
             this.showNotFound();
         }
         
-        document.getElementById('globalSearch').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.executeSearch();
-            }
-        });
-        
-        // Update placeholder when site changes
-        document.getElementById('searchSite').addEventListener('change', (e) => {
-            const site = e.target.value;
-            const input = document.getElementById('globalSearch');
-            if (site === 'local') {
-                input.placeholder = 'Search Gentlemen\'s Club...';
-            } else {
-                const siteName = e.target.options[e.target.selectedIndex].text;
-                input.placeholder = `Search ${siteName}...`;
-            }
-        });
     }
 
     getVideoIdFromUrl() {

@@ -80,6 +80,7 @@
             </a>
             <nav class="sidenav-links">
                 <a href="index.html">🏠 Home</a>
+                <a href="index.html#search">🔍 Search</a>
                 <a href="index.html#favorites">❤️ Favorites</a>
                 <a href="index.html#subscriptions">⭐ Creators</a>
                 <a href="index.html#playlists">📁 Playlists</a>
@@ -97,39 +98,13 @@
             <div class="header-top">
                 <div class="header-left">
                     <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-                    <button class="back-btn" onclick="window.location.href='index.html'">
-                        ← Back
-                    </button>
-                </div>
-                
-                <div class="search-container">
-                    <div class="search-box">
-                        <select id="searchSite" class="search-site-select">
-                            <option value="local">Gentlemen's Club</option>
-                            <optgroup label="Video Sites">
-                                <option value="youtube">YouTube</option>
-                                <option value="pornhub">PornHub</option>
-                                <option value="xvideos">XVideos</option>
-                                <option value="xnxx">XNXX</option>
-                                <option value="xhamster">xHamster</option>
-                                <option value="redtube">RedTube</option>
-                                <option value="youporn">YouPorn</option>
-                                <option value="spankbang">SpankBang</option>
-                                <option value="eporner">Eporner</option>
-                            </optgroup>
-                            <optgroup label="Other">
-                                <option value="reddit">Reddit</option>
-                                <option value="redgifs">RedGifs</option>
-                                <option value="rule34video">Rule34Video</option>
-                                <option value="sfmcompile">SFM Compile</option>
-                            </optgroup>
-                        </select>
-                        <input type="text" id="globalSearch" placeholder="Search Gentlemen's Club...">
-                        <button class="search-btn" onclick="player.executeSearch()">🔍</button>
-                    </div>
+                    <a href="index.html" class="header-logo">
+                        <img src="logo.png" alt="Gentlemen's Club">
+                    </a>
                 </div>
                 
                 <div class="header-right">
+                    <button class="header-btn" title="Search" onclick="window.location.href='index.html#search'">🔍</button>
                     <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode" onclick="toggleTheme()">
                         <img src="dark mode.gif" alt="Toggle theme" id="themeIcon">
                     </button>

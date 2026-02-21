@@ -112,6 +112,10 @@ class UserSystem {
     getCreatorsByType(type) {
         return this.subscriptions.filter(s => s.type === type);
     }
+    
+    getCreator(id) {
+        return this.subscriptions.find(s => s.id === id);
+    }
 
     // Favorites
     isFavorite(videoId) {

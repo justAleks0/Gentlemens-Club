@@ -13,36 +13,13 @@
             <div class="header-top">
                 <div class="header-left">
                     <button class="menu-btn" onclick="app.toggleSidebar()">☰</button>
-                </div>
-                
-                <div class="search-container">
-                    <div class="search-box">
-                        <select id="searchSite" class="search-site-select">
-                            <option value="local">Gentlemen's Club</option>
-                            <optgroup label="Video Sites">
-                                <option value="youtube">YouTube</option>
-                                <option value="pornhub">PornHub</option>
-                                <option value="xvideos">XVideos</option>
-                                <option value="xnxx">XNXX</option>
-                                <option value="xhamster">xHamster</option>
-                                <option value="redtube">RedTube</option>
-                                <option value="youporn">YouPorn</option>
-                                <option value="spankbang">SpankBang</option>
-                                <option value="eporner">Eporner</option>
-                            </optgroup>
-                            <optgroup label="Other">
-                                <option value="reddit">Reddit</option>
-                                <option value="redgifs">RedGifs</option>
-                                <option value="rule34video">Rule34Video</option>
-                                <option value="sfmcompile">SFM Compile</option>
-                            </optgroup>
-                        </select>
-                        <input type="text" id="globalSearch" placeholder="Search Gentlemen's Club...">
-                        <button class="search-btn" onclick="app.executeSearch()">🔍</button>
-                    </div>
+                    <a href="index.html" class="header-logo">
+                        <img src="logo.png" alt="Gentlemen's Club">
+                    </a>
                 </div>
                 
                 <div class="header-right">
+                    <button class="header-btn" onclick="app.switchTab('search')" title="Search">🔍</button>
                     <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode" onclick="app.toggleTheme()">
                         <img src="dark mode.gif" alt="Toggle theme" id="themeIcon">
                     </button>
@@ -58,6 +35,7 @@
             </a>
             <nav class="sidenav-links">
                 <a href="#" onclick="app.switchTab('videos'); app.closeSidebar();">🏠 Home</a>
+                <a href="#" onclick="app.switchTab('search'); app.closeSidebar();">🔍 Search</a>
                 <a href="#" onclick="app.switchTab('create'); app.closeSidebar();" class="sidenav-create">➕ Create</a>
                 <div class="sidenav-divider"></div>
                 <a href="#" onclick="app.switchTab('favorites'); app.closeSidebar();">❤️ Favorites</a>
@@ -96,6 +74,65 @@
                     <button class="add-widget-btn" onclick="app.openWidgetPicker()">
                         <span>➕</span> Add Widget
                     </button>
+                </div>
+            </section>
+
+            <!-- Search Section -->
+            <section id="search" class="tab-content">
+                <div class="search-tab-container">
+                    <div class="search-tab-header">
+                        <div class="search-box-large">
+                            <select id="searchSite" class="search-site-select">
+                                <option value="local">🏠 Local Library</option>
+                                <optgroup label="Video Sites">
+                                    <option value="youtube">YouTube</option>
+                                    <option value="pornhub">PornHub</option>
+                                    <option value="xvideos">XVideos</option>
+                                    <option value="xnxx">XNXX</option>
+                                    <option value="xhamster">xHamster</option>
+                                    <option value="redtube">RedTube</option>
+                                    <option value="youporn">YouPorn</option>
+                                    <option value="spankbang">SpankBang</option>
+                                    <option value="eporner">Eporner</option>
+                                </optgroup>
+                                <optgroup label="Other">
+                                    <option value="reddit">Reddit</option>
+                                    <option value="redgifs">RedGifs</option>
+                                    <option value="rule34video">Rule34Video</option>
+                                    <option value="sfmcompile">SFM Compile</option>
+                                </optgroup>
+                            </select>
+                            <input type="text" id="globalSearch" placeholder="Search..." autocomplete="off">
+                            <button class="search-btn-large" onclick="app.executeSearch()">🔍 Search</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Local Search Results -->
+                    <div id="localSearchResults" class="local-search-results">
+                        <div class="search-placeholder">
+                            <div class="search-placeholder-icon">🔍</div>
+                            <h3>Search your library or the web</h3>
+                            <p>Select a site from the dropdown and enter your search query</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Embedded Browser (Electron webview) -->
+                    <div id="webviewContainer" class="webview-container" style="display: none;">
+                        <div class="webview-toolbar">
+                            <div class="webview-nav">
+                                <button class="webview-btn" onclick="app.webviewGoBack()" title="Back">←</button>
+                                <button class="webview-btn" onclick="app.webviewGoForward()" title="Forward">→</button>
+                                <button class="webview-btn" onclick="app.webviewReload()" title="Reload">↻</button>
+                            </div>
+                            <div class="webview-url" id="webviewUrl"></div>
+                            <div class="webview-actions">
+                                <button class="webview-btn" onclick="app.copyWebviewUrl()" title="Copy URL">📋</button>
+                                <button class="webview-btn" onclick="app.openWebviewExternal()" title="Open in Browser">↗️</button>
+                                <button class="webview-btn close" onclick="app.closeWebview()" title="Close">✕</button>
+                            </div>
+                        </div>
+                        <webview id="searchWebview" class="search-webview" allowpopups></webview>
+                    </div>
                 </div>
             </section>
 
@@ -248,16 +285,30 @@
             </div>
             <form id="siteForm">
                 <div class="form-group">
+                    <label for="siteUrl">URL</label>
+                    <div class="input-with-btn">
+                        <input type="url" id="siteUrl" required placeholder="https://...">
+                        <button type="button" class="fetch-btn" onclick="app.fetchSiteInfo()">
+                            <span class="fetch-text">Fetch Info</span>
+                        </button>
+                    </div>
+                    <small class="fetch-hint">Paste URL and click "Fetch Info" to auto-fill details</small>
+                </div>
+                <div class="form-group">
                     <label for="siteName">Name</label>
                     <input type="text" id="siteName" required placeholder="e.g., Reddit">
                 </div>
                 <div class="form-group">
-                    <label for="siteUrl">URL</label>
-                    <input type="url" id="siteUrl" required placeholder="https://...">
+                    <label for="siteLogo">Logo URL (optional)</label>
+                    <div class="logo-preview-container">
+                        <input type="url" id="siteLogo" placeholder="https://... (favicon or logo URL)">
+                        <div class="logo-preview" id="siteLogoPreview"></div>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="siteColor">Color</label>
+                    <label for="siteColor">Fallback Color</label>
                     <input type="color" id="siteColor" value="#D99BA1">
+                    <small class="fetch-hint">Used when no logo is available</small>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel">Cancel</button>
