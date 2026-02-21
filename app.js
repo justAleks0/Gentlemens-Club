@@ -1503,6 +1503,7 @@ class GentlemensClub {
         const queryPath = encodeURIComponent(query).replace(/%20/g, '-').toLowerCase();
 
         const searchUrls = {
+            google: `https://www.google.com/search?q=${queryPlus}`,
             youtube: `https://www.youtube.com/results?search_query=${queryPlus}`,
             pornhub: `https://www.pornhub.com/video/search?search=${queryPlus}`,
             xvideos: `https://www.xvideos.com/?k=${queryPlus}`,
@@ -1519,6 +1520,7 @@ class GentlemensClub {
         };
 
         const siteNames = {
+            google: 'Google',
             youtube: 'YouTube',
             pornhub: 'PornHub',
             xvideos: 'XVideos',
@@ -1533,10 +1535,14 @@ class GentlemensClub {
             rule34video: 'Rule34Video',
             sfmcompile: 'SFM Compile',
         };
+        
+        // Sites that should use incognito mode
+        const incognitoSites = ['google'];
 
         const url = searchUrls[site];
         if (url) {
-            this.showExternalSearch(url, siteNames[site] || site, query);
+            const useIncognito = incognitoSites.includes(site);
+            this.showExternalSearch(url, siteNames[site] || site, query, useIncognito);
         }
     }
     
@@ -1580,7 +1586,7 @@ class GentlemensClub {
         requestAnimationFrame(() => this.bindLongPressToItems());
     }
     
-    showExternalSearch(url, siteName, query) {
+    showExternalSearch(url, siteName, query, useIncognito = false) {
         const resultsContainer = document.getElementById('localSearchResults');
         const webviewContainer = document.getElementById('webviewContainer');
         const webview = document.getElementById('searchWebview');
@@ -1595,19 +1601,29 @@ class GentlemensClub {
         resultsContainer.style.display = 'none';
         webviewContainer.style.display = 'flex';
         
+        // Set incognito partition if needed (creates isolated session with no persistent data)
+        if (useIncognito) {
+            webview.partition = 'incognito-' + Date.now();
+        } else {
+            webview.partition = 'persist:default';
+        }
+        
+        // Track incognito state
+        this.isIncognitoSearch = useIncognito;
+        
         // Load the URL in webview
         webview.src = url;
-        urlBar.textContent = url;
+        urlBar.textContent = useIncognito ? `🔒 ${url}` : url;
         
         // Listen for URL changes
         webview.addEventListener('did-navigate', (e) => {
-            urlBar.textContent = e.url;
+            urlBar.textContent = this.isIncognitoSearch ? `🔒 ${e.url}` : e.url;
             this.currentSearchUrl = e.url;
         });
         
         webview.addEventListener('did-navigate-in-page', (e) => {
             if (e.isMainFrame) {
-                urlBar.textContent = e.url;
+                urlBar.textContent = this.isIncognitoSearch ? `🔒 ${e.url}` : e.url;
                 this.currentSearchUrl = e.url;
             }
         });
@@ -1790,7 +1806,7 @@ class GentlemensClub {
         const error = document.getElementById('jukeboxError');
         
         // Check cache first
-        if (this.jukeboxCache[this.currentJukeboxCategory]) {
+        if (this.jukeboxCache[this.currentJukeboxCategory] !== undefined) {
             loading.style.display = 'none';
             error.style.display = 'none';
             this.renderJukeboxItems(this.jukeboxCache[this.currentJukeboxCategory]);
@@ -1802,50 +1818,87 @@ class GentlemensClub {
         error.style.display = 'none';
         grid.innerHTML = '';
         
-        try {
-            const items = await this.fetchJukeboxItems(this.currentJukeboxCategory);
-            this.jukeboxCache[this.currentJukeboxCategory] = items;
-            loading.style.display = 'none';
-            this.renderJukeboxItems(items);
-        } catch (err) {
-            console.error('Failed to load Jukebox items:', err);
-            loading.style.display = 'none';
-            error.style.display = 'flex';
-        }
+        const items = await this.fetchJukeboxItems(this.currentJukeboxCategory);
+        this.jukeboxCache[this.currentJukeboxCategory] = items;
+        loading.style.display = 'none';
+        this.renderJukeboxItems(items);
     }
     
     async fetchJukeboxItems(category) {
-        const baseUrl = 'https://api.github.com/repos/justAleks0/Gentlemens-Club/contents/The%20Jukebox/' + category;
+        const baseUrl = `https://api.github.com/repos/justAleks0/Gentlemens-Club/contents/The%20Jukebox/${category}`;
         
-        // Fetch directory listing
-        const response = await fetch(baseUrl);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch: ${response.status}`);
+        console.log('Fetching Jukebox:', baseUrl);
+        
+        try {
+            // Fetch directory listing
+            const response = await fetch(baseUrl, {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                cache: 'no-store'
+            });
+            
+            console.log('GitHub API response status:', response.status);
+            
+            // Handle 404 - folder doesn't exist yet on GitHub
+            if (response.status === 404) {
+                console.log(`Jukebox folder "${category}" not found on GitHub yet`);
+                return [];
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('GitHub API error:', response.status, errorText);
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+            
+            const files = await response.json();
+            console.log('Files found:', files);
+            
+            // Handle case where it's not an array (could be a single file or error)
+            if (!Array.isArray(files)) {
+                console.log('Unexpected response format:', files);
+                return [];
+            }
+            
+            const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+            console.log('JSON files:', jsonFiles.map(f => f.name));
+            
+            if (jsonFiles.length === 0) {
+                return [];
+            }
+            
+            // Fetch each JSON file's content
+            const items = await Promise.all(
+                jsonFiles.map(async (file) => {
+                    try {
+                        console.log('Fetching file:', file.download_url);
+                        const contentResponse = await fetch(file.download_url);
+                        if (!contentResponse.ok) {
+                            console.error('Failed to fetch file content:', file.name, contentResponse.status);
+                            return null;
+                        }
+                        const content = await contentResponse.json();
+                        console.log('Loaded:', file.name, content);
+                        return {
+                            ...content,
+                            _filename: file.name,
+                            _sha: file.sha
+                        };
+                    } catch (e) {
+                        console.error(`Failed to load ${file.name}:`, e);
+                        return null;
+                    }
+                })
+            );
+            
+            return items.filter(Boolean);
+            
+        } catch (err) {
+            console.error('Jukebox fetch error:', err);
+            // Return empty array instead of throwing - shows empty state instead of error
+            return [];
         }
-        
-        const files = await response.json();
-        const jsonFiles = files.filter(f => f.name.endsWith('.json'));
-        
-        // Fetch each JSON file's content
-        const items = await Promise.all(
-            jsonFiles.map(async (file) => {
-                try {
-                    const contentResponse = await fetch(file.download_url);
-                    if (!contentResponse.ok) return null;
-                    const content = await contentResponse.json();
-                    return {
-                        ...content,
-                        _filename: file.name,
-                        _sha: file.sha
-                    };
-                } catch (e) {
-                    console.error(`Failed to load ${file.name}:`, e);
-                    return null;
-                }
-            })
-        );
-        
-        return items.filter(Boolean);
     }
     
     renderJukeboxItems(items) {
@@ -1855,7 +1908,11 @@ class GentlemensClub {
             grid.innerHTML = `
                 <div class="jukebox-empty">
                     <div class="icon">📭</div>
-                    <p>No ${this.currentJukeboxCategory.toLowerCase()}s available yet.<br>Be the first to share one!</p>
+                    <p>No ${this.currentJukeboxCategory.toLowerCase()}s shared yet.</p>
+                    <p style="font-size: 12px; margin-top: 10px; opacity: 0.7;">
+                        Export your items and push them to GitHub to share!<br>
+                        Folder: The Jukebox/${this.currentJukeboxCategory}/
+                    </p>
                 </div>
             `;
             return;
@@ -2068,8 +2125,9 @@ class GentlemensClub {
     }
     
     refreshJukebox() {
-        // Clear cache for current category
-        delete this.jukeboxCache[this.currentJukeboxCategory];
+        // Clear all cache
+        this.jukeboxCache = {};
+        console.log('Jukebox cache cleared');
         this.renderJukebox();
     }
 

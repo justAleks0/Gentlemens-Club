@@ -116,4 +116,18 @@ app.on('web-contents-created', (event, contents) => {
     contents.session.setPermissionRequestHandler((webContents, permission, callback) => {
         callback(true);
     });
+    
+    // Prevent new windows from opening - navigate in same webview instead
+    contents.setWindowOpenHandler(({ url }) => {
+        // If it's a webview, navigate to the URL instead of opening new window
+        if (contents.getType() === 'webview') {
+            contents.loadURL(url);
+        }
+        return { action: 'deny' };
+    });
+    
+    // Also handle will-navigate to keep navigation within webview
+    contents.on('will-navigate', (event, url) => {
+        // Allow navigation within the webview
+    });
 });
