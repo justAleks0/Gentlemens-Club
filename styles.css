@@ -1021,6 +1021,33 @@ body {
     align-items: center;
 }
 
+.section-search {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text-primary);
+    font-size: 14px;
+    min-width: 200px;
+    transition: all 0.15s ease;
+}
+
+.section-search:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+}
+
+.section-search::placeholder {
+    color: var(--text-muted);
+}
+
+.videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
 .add-btn {
     background: var(--accent);
     color: #000;
@@ -2450,6 +2477,10 @@ form {
 
 .card-action-btn.edit:hover {
     background: var(--accent);
+}
+
+.card-action-btn.export:hover {
+    background: #4a9eff;
 }
 
 .card-action-btn.delete:hover {

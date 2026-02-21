@@ -4,11 +4,12 @@ class GentlemensClub {
     constructor() {
         this.sites = JSON.parse(localStorage.getItem('gentlemensclub_sites')) || this.getDefaultSites();
         this.videos = JSON.parse(localStorage.getItem('gentlemensclub_videos')) || [];
-        this.currentTab = 'videos';
+        this.currentTab = 'home';
         this.editingItem = null;
         this.editingPlaylist = null;
         this.contextTarget = null;
         this.activeTag = null;
+        this.videoFilter = '';
         this.currentPlaylistId = null;
         this.addToPlaylistVideoId = null;
         this.currentTheme = localStorage.getItem('gentlemensclub_theme') || 'dark';
@@ -378,6 +379,7 @@ class GentlemensClub {
             <div class="video-card" data-id="${video.id}" onclick="app.openVideo('${video.id}')" oncontextmenu="app.showContextMenu(event, 'video', '${video.id}')">
                 <div class="card-actions">
                     <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('video', '${video.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn export" onclick="event.preventDefault(); event.stopPropagation(); app.exportItem('video', '${video.id}')" title="Export">📤</button>
                     <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('video', '${video.id}')" title="Delete">🗑️</button>
                 </div>
                 <div class="video-thumb">
@@ -399,7 +401,7 @@ class GentlemensClub {
         const hash = window.location.hash.replace('#', '');
 
         // Handle hash-based tab navigation
-        const validTabs = ['videos', 'search', 'create', 'favorites', 'subscriptions', 'playlists', 'watchlater', 'history', 'sites'];
+        const validTabs = ['home', 'videos', 'search', 'create', 'favorites', 'subscriptions', 'playlists', 'watchlater', 'history', 'sites'];
         if (hash && validTabs.includes(hash)) {
             this.switchTab(hash);
         }
@@ -544,18 +546,19 @@ class GentlemensClub {
 
     renderCurrentTab() {
         switch(this.currentTab) {
-            case 'videos':
+            case 'home':
                 this.renderWidgets();
                 break;
+            case 'videos':
+                this.renderAllVideos();
+                break;
             case 'search':
-                // Search tab - focus the input
                 setTimeout(() => {
                     const input = document.getElementById('globalSearch');
                     if (input) input.focus();
                 }, 100);
                 break;
             case 'create':
-                // Create section is static HTML
                 break;
             case 'favorites':
                 this.renderFavorites();
@@ -581,6 +584,61 @@ class GentlemensClub {
     openVideo(id) {
         user.addToHistory(id);
         window.location.href = `player.html?v=${id}`;
+    }
+
+    // All Videos Tab
+    renderAllVideos() {
+        const grid = document.getElementById('videosGrid');
+        const tagsBar = document.getElementById('tagsBar');
+        
+        this.renderTags();
+        
+        if (this.videos.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="icon">🎬</div>
+                    <p>No videos yet. Go to Create to add your first video!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let filteredVideos = [...this.videos];
+        
+        if (this.activeTag) {
+            filteredVideos = filteredVideos.filter(v => 
+                v.tags && v.tags.includes(this.activeTag)
+            );
+        }
+        
+        if (this.videoFilter) {
+            const filter = this.videoFilter.toLowerCase();
+            filteredVideos = filteredVideos.filter(v =>
+                (v.title && v.title.toLowerCase().includes(filter)) ||
+                (v.channel && v.channel.toLowerCase().includes(filter)) ||
+                (v.tags && v.tags.some(t => t.toLowerCase().includes(filter)))
+            );
+        }
+        
+        filteredVideos.sort((a, b) => new Date(b.addedAt || 0) - new Date(a.addedAt || 0));
+        
+        if (filteredVideos.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="icon">🔍</div>
+                    <p>No videos match your filter.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        grid.innerHTML = filteredVideos.map(video => this.renderVideoCard(video)).join('');
+        requestAnimationFrame(() => this.bindLongPressToItems());
+    }
+    
+    filterVideos(query) {
+        this.videoFilter = query;
+        this.renderAllVideos();
     }
 
     // Favorites
@@ -1044,6 +1102,8 @@ class GentlemensClub {
         document.getElementById('playlistForm').reset();
         document.getElementById('creatorForm').reset();
         document.getElementById('siteColor').value = '#D99BA1';
+        this.editingItem = null;
+        this.editingPlaylist = null;
         this.editingCreator = null;
 
         // Clear thumbnail preview
@@ -1130,6 +1190,9 @@ class GentlemensClub {
                 break;
             case 'delete':
                 this.deleteItem(type, id);
+                break;
+            case 'export':
+                this.exportItem(type, id);
                 break;
         }
         
@@ -1607,11 +1670,102 @@ class GentlemensClub {
             window.open(this.currentSearchUrl, '_blank');
         }
     }
+    
+    async exportItem(type, id) {
+        let item = null;
+        let filename = '';
+        let exportData = null;
+        
+        switch(type) {
+            case 'video':
+                item = this.videos.find(v => v.id === id);
+                if (item) {
+                    filename = item.title || `video_${id}`;
+                    exportData = {
+                        type: 'video',
+                        exportedAt: new Date().toISOString(),
+                        data: item
+                    };
+                }
+                break;
+            case 'site':
+                item = this.sites.find(s => s.id === id);
+                if (item) {
+                    filename = item.name || `site_${id}`;
+                    exportData = {
+                        type: 'site',
+                        exportedAt: new Date().toISOString(),
+                        data: item
+                    };
+                }
+                break;
+            case 'creator':
+                item = user.getCreator(id);
+                if (item) {
+                    filename = item.name || `creator_${id}`;
+                    // Also find videos by this creator
+                    const creatorVideos = this.videos.filter(v => 
+                        v.channel && v.channel.toLowerCase() === item.name.toLowerCase()
+                    );
+                    exportData = {
+                        type: 'creator',
+                        exportedAt: new Date().toISOString(),
+                        data: item,
+                        videos: creatorVideos,
+                        videoCount: creatorVideos.length
+                    };
+                }
+                break;
+            case 'playlist':
+                item = user.getPlaylist(id);
+                if (item) {
+                    filename = item.name || `playlist_${id}`;
+                    // Get full video data for each video in playlist
+                    const playlistVideos = item.videos
+                        .map(videoId => this.videos.find(v => v.id === videoId))
+                        .filter(Boolean);
+                    exportData = {
+                        type: 'playlist',
+                        exportedAt: new Date().toISOString(),
+                        data: {
+                            ...item,
+                            videoIds: item.videos // Keep original IDs
+                        },
+                        videos: playlistVideos,
+                        videoCount: playlistVideos.length
+                    };
+                }
+                break;
+        }
+        
+        if (!item || !exportData) {
+            alert('Item not found');
+            return;
+        }
+        
+        // Check if we're in Electron
+        if (window.electronAPI && window.electronAPI.exportItem) {
+            const result = await window.electronAPI.exportItem(type, exportData, filename);
+            if (result.success) {
+                alert(`Exported to:\n${result.path}`);
+            } else {
+                alert(`Export failed: ${result.error}`);
+            }
+        } else {
+            // Fallback for browser - download as file
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    }
 
     filterByTag(tag) {
         this.activeTag = this.activeTag === tag ? null : tag;
-        this.renderVideos();
-        this.renderTags();
+        this.renderAllVideos();
     }
 
     saveSites() {
@@ -1689,6 +1843,7 @@ class GentlemensClub {
                oncontextmenu="app.showContextMenu(event, 'site', '${site.id}')">
                 <div class="card-actions">
                     <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('site', '${site.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn export" onclick="event.preventDefault(); event.stopPropagation(); app.exportItem('site', '${site.id}')" title="Export">📤</button>
                     <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('site', '${site.id}')" title="Delete">🗑️</button>
                 </div>
                 <div class="site-icon" style="background: ${site.color}">
@@ -1800,9 +1955,10 @@ class GentlemensClub {
             ).length;
             
             return `
-                <div class="subscription-card" data-id="${sub.id}" data-type="${type}" onclick="app.searchChannelVideos('${this.escapeHtml(sub.name)}')">
+                <div class="subscription-card" data-id="${sub.id}" data-type="${type}" onclick="app.searchChannelVideos('${this.escapeHtml(sub.name)}')" oncontextmenu="app.showContextMenu(event, 'creator', '${sub.id}')">
                     <div class="card-actions">
                         <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('creator', '${sub.id}')" title="Edit">✏️</button>
+                        <button class="card-action-btn export" onclick="event.preventDefault(); event.stopPropagation(); app.exportItem('creator', '${sub.id}')" title="Export">📤</button>
                         <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteCreator('${sub.id}', '${this.escapeHtml(sub.name)}', event)" title="Delete">🗑️</button>
                     </div>
                     <div class="subscription-avatar">
@@ -1891,6 +2047,7 @@ class GentlemensClub {
                  oncontextmenu="app.showContextMenu(event, 'playlist', '${playlist.id}')">
                 <div class="card-actions">
                     <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('playlist', '${playlist.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn export" onclick="event.preventDefault(); event.stopPropagation(); app.exportItem('playlist', '${playlist.id}')" title="Export">📤</button>
                     <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('playlist', '${playlist.id}')" title="Delete">🗑️</button>
                 </div>
                 <div class="playlist-thumb">
@@ -1930,6 +2087,7 @@ class GentlemensClub {
                  oncontextmenu="app.showContextMenu(event, 'video', '${video.id}')">
                 <div class="card-actions">
                     <button class="card-action-btn edit" onclick="event.preventDefault(); event.stopPropagation(); app.editItem('video', '${video.id}')" title="Edit">✏️</button>
+                    <button class="card-action-btn export" onclick="event.preventDefault(); event.stopPropagation(); app.exportItem('video', '${video.id}')" title="Export">📤</button>
                     <button class="card-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteItem('video', '${video.id}')" title="Delete">🗑️</button>
                 </div>
                 <div class="video-thumb">

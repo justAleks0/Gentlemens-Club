@@ -34,7 +34,8 @@
                 <img src="logo.png" alt="Gentlemen's Club">
             </a>
             <nav class="sidenav-links">
-                <a href="#" onclick="app.switchTab('videos'); app.closeSidebar();">🏠 Home</a>
+                <a href="#" onclick="app.switchTab('home'); app.closeSidebar();">🏠 Home</a>
+                <a href="#" onclick="app.switchTab('videos'); app.closeSidebar();">🎬 Videos</a>
                 <a href="#" onclick="app.switchTab('search'); app.closeSidebar();">🔍 Search</a>
                 <a href="#" onclick="app.switchTab('create'); app.closeSidebar();" class="sidenav-create">➕ Create</a>
                 <div class="sidenav-divider"></div>
@@ -56,7 +57,7 @@
         <!-- Main Content -->
         <main class="content" id="mainContent">
             <!-- Home Section (Customizable Dashboard) -->
-            <section id="videos" class="tab-content active">
+            <section id="home" class="tab-content active">
                 <div class="home-header">
                     <h1 class="home-greeting" id="homeGreeting">Welcome back</h1>
                     <button class="customize-btn" onclick="app.toggleEditMode()">
@@ -134,6 +135,21 @@
                         <webview id="searchWebview" class="search-webview" allowpopups></webview>
                     </div>
                 </div>
+            </section>
+
+            <!-- Videos Section -->
+            <section id="videos" class="tab-content">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">🎬</span>
+                        <h2>All Videos</h2>
+                    </div>
+                    <div class="section-actions">
+                        <input type="text" id="videoSearchInput" class="section-search" placeholder="Filter videos..." oninput="app.filterVideos(this.value)">
+                    </div>
+                </div>
+                <div id="tagsBar" class="tags-bar"></div>
+                <div class="videos-grid" id="videosGrid"></div>
             </section>
 
             <!-- Create Section -->
@@ -584,6 +600,7 @@
         <button class="context-item video-only" data-action="addtoplaylist">📁 Add to Playlist</button>
         <div class="context-divider video-only"></div>
         <button class="context-item" data-action="edit">✏️ Edit</button>
+        <button class="context-item" data-action="export">📤 Export to Jukebox</button>
         <button class="context-item" data-action="delete">🗑️ Delete</button>
     </div>
 

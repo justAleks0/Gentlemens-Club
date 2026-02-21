@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, session } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 // Enable live reload for development (soft reload only - refreshes renderer)
 try {
@@ -64,6 +65,41 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
+    }
+});
+
+// IPC handler for exporting items to The Jukebox
+ipcMain.handle('export-item', async (event, { type, data, filename }) => {
+    try {
+        const jukeboxPath = path.join(__dirname, 'The Jukebox');
+        
+        // Map type to subfolder
+        const subfolders = {
+            'video': 'Video',
+            'site': 'Site',
+            'creator': 'Creator',
+            'playlist': 'Playlist'
+        };
+        
+        const subfolder = subfolders[type] || type;
+        const folderPath = path.join(jukeboxPath, subfolder);
+        
+        // Ensure folder exists
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
+        
+        // Clean filename (remove invalid characters)
+        const cleanFilename = filename.replace(/[<>:"/\\|?*]/g, '_').substring(0, 100);
+        const filePath = path.join(folderPath, `${cleanFilename}.json`);
+        
+        // Write the JSON file
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+        
+        return { success: true, path: filePath };
+    } catch (error) {
+        console.error('Export error:', error);
+        return { success: false, error: error.message };
     }
 });
 

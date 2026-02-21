@@ -1,0 +1,33 @@
+{
+  "type": "playlist",
+  "exportedAt": "2026-02-21T05:58:45.198Z",
+  "data": {
+    "id": "1771653505105",
+    "name": "Minecraft",
+    "description": "",
+    "videos": [
+      "1771653123220"
+    ],
+    "createdAt": "2026-02-21T05:58:25.105Z",
+    "updatedAt": "2026-02-21T05:58:29.812Z",
+    "videoIds": [
+      "1771653123220"
+    ]
+  },
+  "videos": [
+    {
+      "id": "1771653123220",
+      "title": "Winning a Minecraft Tournament Three Times in a Row (Block Wars)",
+      "url": "https://youtu.be/tkOiFz_GQa0?si=ZdLZhIz70v8dUJpa",
+      "thumbnail": "https://img.youtube.com/vi/tkOiFz_GQa0/maxresdefault.jpg",
+      "duration": "44:28",
+      "channel": "deme",
+      "tags": [],
+      "views": 350,
+      "rating": 89,
+      "likes": 61,
+      "addedAt": "2026-02-21T05:52:03.220Z"
+    }
+  ],
+  "videoCount": 1
+}
